@@ -1,0 +1,2 @@
+logs/*.log -whitespace
+patches/*.patch -whitespace

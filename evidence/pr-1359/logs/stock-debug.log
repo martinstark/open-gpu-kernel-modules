@@ -1,0 +1,61 @@
+[27795.845018] <host> kernel: nvidia-modeset: DPCONN> Notify detach begin
+[27795.884005] <host> kernel: nvidia-modeset: DPCONN> Notify detach end
+[27795.968005] <host> kernel: nvidia-modeset: DP2xCONN> Notify Attach Begin (Head 3, pclk 1097750 (KHz) raster 4000 x 2287  257 bpp, DSC 1, FEC 1)
+[27795.968046] <host> kernel: nvidia-modeset: DP2xCONN>   |  (VIDEO) |
+[27795.968064] <host> kernel: nvidia-modeset: DP2xCONN> DSC Mode = SINGLE
+[27795.968074] <host> kernel: nvidia-modeset: ERROR: DP2xCONN> SST-Flush mode should not be called when head is not attached. Returning early without enabling flush
+[27796.044010] <host> kernel: nvidia-modeset: DP-DEV> Enabling DSC decompression on device - 
+[27796.070004] <host> kernel: nvidia-modeset: DPCONN> Notify Attach End
+[27796.076017] <host> kernel: nvidia-modeset: GPU:0: HdmiPacketLibrary: MoreInfoframe: Sent infoframe of length 36 bytes, transmit ctrl 0x3 at offset 0 head=3 subdev=0
+[27798.134009] <host> kernel: nvidia-modeset: DPCONN> Delayed HDCP Cap read called.
+[27829.607043] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27829.608005] <host> kernel: nvidia-modeset: WARNING: DPCONN> Zombie? :  1 <pointer>
+[27837.111024] <host> kernel: nvidia-modeset: requested: 0
+[27837.118029] <host> kernel: nvidia-modeset: ERROR: Failed to write bw allocation control: 0
+[27837.124028] <host> kernel: nvidia-modeset: DP> HPD v1.4
+[27837.125027] <host> kernel: nvidia-modeset: DPCONN> Rebuild possible link rate configurations
+[27837.127017] <host> kernel: nvidia-modeset: DP> SINK-OUI id(0x00e70c00) : rev:0.0
+[27837.134028] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.140017] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.147027] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.152026] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.158018] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.164017] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.169017] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.175026] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.181017] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.186008] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.191006] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.200006] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.218004] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.229013] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.235004] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.243012] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.249013] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.254006] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.260005] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.266007] <host> kernel: nvidia-modeset: WARNING: DP> AuxChCtl Failing, if a device is connected you shouldn't be seeing this
+[27837.287004] <host> kernel: nvidia-modeset: DP-CONN> Edid read complete: Manuf Id: 0xac10, Name: DELL U2725QE
+[27837.288007] <host> kernel: nvidia-modeset: ERROR: DP2xEVO> Enabling flush mode failed!
+[27837.288050] <host> kernel: nvidia-modeset: ERROR: DP2xCONN> Set flush mode phase 1 failed
+[27837.290014] <host> kernel: nvidia-modeset: ERROR: DP2xEVO> Enabling flush mode failed!
+[27837.290033] <host> kernel: nvidia-modeset: ERROR: DP2xCONN> Set flush mode phase 1 failed
+[27837.290039] <host> kernel: nvidia-modeset: WARNING: DPCONN> Zombie? :  0 <pointer>
+[27837.290047] <host> kernel: nvidia-modeset: DP-CONN> NotifyDetectComplete
+[27837.681020] <host> kernel: nvidia-modeset: DP2xCONN> Notify Attach Begin (Head 3, pclk 1097750 (KHz) raster 4000 x 2287  257 bpp, DSC 1, FEC 1)
+[27837.681062] <host> kernel: nvidia-modeset: DP2xCONN>   |  (VIDEO) |
+[27837.681078] <host> kernel: nvidia-modeset: DP2xCONN> DSC Mode = SINGLE
+[27837.682019] <host> kernel: nvidia-modeset: ERROR: DP2xEVO> Enabling flush mode failed!
+[27837.682045] <host> kernel: nvidia-modeset: ERROR: DP2xCONN> Set flush mode phase 1 failed
+[27837.697014] <host> kernel: nvidia-modeset: DPCONN> Notify Attach End
+[27837.699014] <host> kernel: nvidia-modeset: GPU:0: HdmiPacketLibrary: MoreInfoframe: Sent infoframe of length 36 bytes, transmit ctrl 0x3 at offset 0 head=3 subdev=0
+[27839.733031] <host> kernel: nvidia-modeset: DPCONN> Delayed HDCP Cap read called.
+[27842.521024] <host> kernel: nvidia-modeset: DPCONN> Notify detach begin
+[27842.540027] <host> kernel: nvidia-modeset: DPCONN> Notify detach end
+[27842.614003] <host> kernel: nvidia-modeset: DP2xCONN> Notify Attach Begin (Head 3, pclk 533250 (KHz) raster 4000 x 2222  30 bpp, DSC 0, FEC 0)
+[27842.614038] <host> kernel: nvidia-modeset: DP2xCONN>   |  (VIDEO) |
+[27842.614051] <host> kernel: nvidia-modeset: ERROR: DP2xCONN> SST-Flush mode should not be called when head is not attached. Returning early without enabling flush
+[27842.689027] <host> kernel: nvidia-modeset: DPCONN> Notify Attach End
+[27842.692026] <host> kernel: nvidia-modeset: GPU:0: HdmiPacketLibrary: MoreInfoframe: Sent infoframe of length 36 bytes, transmit ctrl 0x3 at offset 0 head=3 subdev=0
+[27842.694018] <host> kernel: nvidia-modeset: DP> IRQ
+[27844.725010] <host> kernel: nvidia-modeset: DPCONN> Delayed HDCP Cap read called.

@@ -1,0 +1,243 @@
+diff --git a/kernel-open/nvidia-modeset/nvidia-modeset-linux.c b/kernel-open/nvidia-modeset/nvidia-modeset-linux.c
+index 62986c4..fc79460 100644
+--- a/kernel-open/nvidia-modeset/nvidia-modeset-linux.c
++++ b/kernel-open/nvidia-modeset/nvidia-modeset-linux.c
+@@ -139,6 +139,10 @@ MODULE_PARM_DESC(debug, "Enable debug logging");
+ static int debug = 0;
+ module_param_named(debug, debug, int, 0644);
+ 
++MODULE_PARM_DESC(dp_recovery_diag, "DP recovery diagnostic build marker");
++static bool dp_recovery_diag = true;
++module_param_named(dp_recovery_diag, dp_recovery_diag, bool, 0444);
++
+ #if IS_ENABLED(CONFIG_EXTCON_DISP_CABLE_STATE)
+ /*
+  * Extcon reporting for HDMI video and audio state.
+diff --git a/src/common/displayport/src/dp_connectorimpl.cpp b/src/common/displayport/src/dp_connectorimpl.cpp
+index 99e0e97..c799bf0 100644
+--- a/src/common/displayport/src/dp_connectorimpl.cpp
++++ b/src/common/displayport/src/dp_connectorimpl.cpp
+@@ -1439,6 +1439,8 @@ bool ConnectorImpl::compoundQueryAttach(Group * target,
+     if(!connectorActive || (bIsDiscoveryDetectActive || !isDiscoveryDetectComplete))
+     {
+         DP_ASSERT(0 && "DPCONN> compoundQueryAttach called when connector is not active or when detection is in progress!");
++        DP_PRINTF(DP_ERROR, "DPDIAG query-rejected active=%d discovery=%d complete=%d",
++                  connectorActive, bIsDiscoveryDetectActive, isDiscoveryDetectComplete);
+         return false;
+     }
+ 
+@@ -6093,6 +6095,7 @@ bool ConnectorImpl::trainLinkOptimized(LinkConfiguration lConfig)
+     if (isNoActiveStreamAndPowerdown())
+     {
+         DP_PRINTF(DP_INFO, "Power off the link because no stream are active");
++        DP_PRINTF(DP_NOTICE, "DPDIAG train-optimized powered-down: no active streams");
+         return true;
+     }
+ 
+@@ -6932,6 +6935,10 @@ bool ConnectorImpl::train(const LinkConfiguration & lConfig, bool force,
+         this->psrLinkConfig = activeLinkConfig;
+     }
+ 
++    DP_PRINTF(DP_NOTICE, "DPDIAG connector-train sor=%u result=%d force=%d requestedRate=%" NvU64_fmtu " requestedLanes=%u requestedFec=%d actualRate=%" NvU64_fmtu " actualLanes=%u actualFec=%d",
++              main->getSorIndex(), result, force, lConfig.peakRate, lConfig.lanes,
++              lConfig.bEnableFEC, activeLinkConfig.peakRate,
++              activeLinkConfig.lanes, activeLinkConfig.bEnableFEC);
+     return result;
+ }
+ 
+@@ -9888,4 +9895,3 @@ void ConnectorImpl::ensureMstNodesPoweredUp(Group * target)
+         pendingPowerUpPhyMessage->post();
+     }
+ }
+-
+diff --git a/src/common/displayport/src/dp_connectorimpl2x.cpp b/src/common/displayport/src/dp_connectorimpl2x.cpp
+index 39056d0..9c94134 100644
+--- a/src/common/displayport/src/dp_connectorimpl2x.cpp
++++ b/src/common/displayport/src/dp_connectorimpl2x.cpp
+@@ -812,6 +812,8 @@ bool ConnectorImpl2x::notifyAttachBegin(Group *target, const DpModesetParams &mo
+     if(!connectorActive || (bIsDiscoveryDetectActive || !isDiscoveryDetectComplete))
+     {
+         DP_ASSERT(0 && "DPCONN> notifyAttachBegin called when connector is not active or when detection is in progress!");
++        DP_PRINTF(DP_ERROR, "DPDIAG attach-rejected active=%d discovery=%d complete=%d",
++                  connectorActive, bIsDiscoveryDetectActive, isDiscoveryDetectComplete);
+         return false;
+     }
+ 
+@@ -973,6 +975,11 @@ bool ConnectorImpl2x::notifyAttachBegin(Group *target, const DpModesetParams &mo
+     // isZombie() will catch this
+     bLinkTrainingStatus = trainLinkOptimized(getMaxLinkConfig());
+ 
++    DP_PRINTF(DP_NOTICE, "DPDIAG attach-trained sor=%u result=%d dsc=%d requestedFec=%d actualFec=%d rate=%" NvU64_fmtu " lanes=%u",
++              main->getSorIndex(), bLinkTrainingStatus, bEnableDsc, bEnableFEC,
++              activeLinkConfig.bEnableFEC, activeLinkConfig.peakRate,
++              activeLinkConfig.lanes);
++
+     // if LT is successful, see if panel supports DSC and if so, set DSC enabled/disabled
+     // according to the mode requested.
+     if(bLinkTrainingStatus)
+@@ -986,9 +993,15 @@ bool ConnectorImpl2x::notifyAttachBegin(Group *target, const DpModesetParams &mo
+                     DP_ASSERT(!"DP2xCONN> Failed to configure DSC on DP to HDMI PCON!");
+                 }
+             }
+-            else if(!setDeviceDscState(dev, bEnableDsc))
++            else
+             {
+-                DP_ASSERT(!"DP2xCONN> Failed to configure DSC on Sink!");
++                const bool dscStatus = setDeviceDscState(dev, bEnableDsc);
++                DP_PRINTF(DP_NOTICE, "DPDIAG attach-dsc sor=%u enable=%d result=%d",
++                          main->getSorIndex(), bEnableDsc, dscStatus);
++                if (!dscStatus)
++                {
++                    DP_ASSERT(!"DP2xCONN> Failed to configure DSC on Sink!");
++                }
+             }
+         }
+     }
+@@ -1108,6 +1121,8 @@ void ConnectorImpl2x::notifyAttachEnd(bool modesetCancelled)
+     if(!connectorActive || (bIsDiscoveryDetectActive || !isDiscoveryDetectComplete))
+     {
+         DP_ASSERT(0 && "DPCONN> notifyAttachEnd called when connector is not active or when detection is in progress!");
++        DP_PRINTF(DP_ERROR, "DPDIAG attach-end-rejected active=%d discovery=%d complete=%d",
++                  connectorActive, bIsDiscoveryDetectActive, isDiscoveryDetectComplete);
+         return;
+     }
+ 
+@@ -1725,6 +1740,18 @@ void ConnectorImpl2x::notifyDetachEnd(bool bKeepOdAlive, bool bKeepLinkOn)
+ 
+ bool ConnectorImpl2x::enableFlush()
+ {
++    DP_PRINTF(DP_NOTICE, "DPDIAG flush-enter sor=%u rg=%d mst=%d active=%d discovery=%d complete=%d groupsEmpty=%d transitionEmpty=%d",
++              main->getSorIndex(), main->isRgFlushSequenceUsed(), linkUseMultistream(),
++              connectorActive, bIsDiscoveryDetectActive, isDiscoveryDetectComplete,
++              activeGroups.isEmpty(), intransitionGroups.isEmpty());
++    for (ListElement *e = activeGroups.begin(); e != activeGroups.end(); e = e->next)
++    {
++        GroupImpl *group = (GroupImpl *)e;
++        DP_PRINTF(DP_NOTICE, "DPDIAG flush-group head=%u attached=%d transition=%d dsc=%d",
++                  group->headIndex, group->isHeadAttached(),
++                  intransitionGroups.contains(group), group->lastModesetInfo.bEnableDsc);
++    }
++
+     // Fallback to legacy SF Flush sequence
+     if (!main->isRgFlushSequenceUsed())
+     {
+diff --git a/src/common/displayport/src/dp_deviceimpl.cpp b/src/common/displayport/src/dp_deviceimpl.cpp
+index db9be88..0517c81 100644
+--- a/src/common/displayport/src/dp_deviceimpl.cpp
++++ b/src/common/displayport/src/dp_deviceimpl.cpp
+@@ -2928,6 +2928,9 @@ bool DeviceImpl::setDscEnable(bool enable)
+         return false;
+     }
+ 
++    DP_PRINTF(DP_NOTICE, "DPDIAG sink-dsc requested=%d current=%d writeNeeded=%d",
++              enable, bCurrDscEnable, enable != bCurrDscEnable);
++
+     if(enable)
+     {
+         if(bDscPassThrough)
+@@ -2986,6 +2989,8 @@ bool DeviceImpl::setDscEnable(bool enable)
+     {
+         dscEnableStatus = this->devDoingDscDecompression->setDpcdData(NV_DPCD14_DSC_ENABLE,
+                               &dscEnableByte, sizeof dscEnableByte, &size, &nakReason);
++        DP_PRINTF(DP_NOTICE, "DPDIAG sink-dsc-write enable=%d status=%d bytes=%u nak=%u",
++                  enable, dscEnableStatus, size, nakReason);
+         if (dscEnableStatus != AuxBus::success)
+         {
+             DP_PRINTF(DP_ERROR, "DP-DEV> Setting DSC Enable on sink %s failed",
+diff --git a/src/common/displayport/src/dp_evoadapter.cpp b/src/common/displayport/src/dp_evoadapter.cpp
+index 947fcaa..3e9a971 100644
+--- a/src/common/displayport/src/dp_evoadapter.cpp
++++ b/src/common/displayport/src/dp_evoadapter.cpp
+@@ -1650,6 +1650,10 @@ bool EvoMainLink::train(const LinkTrainParameters &trainParams)
+ 
+     NV_DPTRACE_INFO(LINK_TRAINING_DONE, status, requestRmLC.peakRate, requestRmLC.lanes);
+ 
++    DP_PRINTF(DP_NOTICE, "DPDIAG legacy-train display=0x%x status=0x%x err=0x%x result=%d requestedFec=%d actualFec=%d",
++              displayId, status, err, result, requestRmLC.bEnableFEC,
++              retLink->bEnableFEC);
++
+     return result;
+ }
+ 
+@@ -2298,6 +2302,9 @@ bool EvoMainLink::configureFec
+ 
+     NvU32 code = provider->rmControl0073(NV0073_CTRL_CMD_DP_CONFIGURE_FEC, &params, sizeof(params));
+ 
++    DP_PRINTF(DP_NOTICE, "DPDIAG configure-fec display=0x%x enable=%d status=0x%x",
++              displayId, bEnableFec, code);
++
+     if (code == NVOS_STATUS_SUCCESS)
+     {
+         return true;
+diff --git a/src/common/displayport/src/dp_evoadapter2x.cpp b/src/common/displayport/src/dp_evoadapter2x.cpp
+index ed1a413..e0fac34 100644
+--- a/src/common/displayport/src/dp_evoadapter2x.cpp
++++ b/src/common/displayport/src/dp_evoadapter2x.cpp
+@@ -479,6 +479,11 @@ bool EvoMainLink2x::train(const LinkTrainParameters &trainParams)
+     NvU64 ltStartTimeUs  = bAllowFullFallback ? 0 : timer->getTimeUs();
+     NvU32 ltAttemptCount = 0;
+ 
++    DP_PRINTF(DP_NOTICE, "DPDIAG train-start display=0x%x sor=%u rate=%" NvU64_fmtu " lanes=%u fec=%d coding128=%d force=%d skip=%d fullFallback=%d",
++              displayId, provider->getSorIndex(), link.peakRate, link.lanes,
++              link.bEnableFEC, link.bIs128b132bChannelCoding, force, bSkipLt,
++              bAllowFullFallback);
++
+     do
+     {
+         // Keep record of requested channel coding.
+@@ -531,6 +536,11 @@ bool EvoMainLink2x::train(const LinkTrainParameters &trainParams)
+         ltCounter++;
+         ltAttemptCount++;
+ 
++        DP_PRINTF(DP_NOTICE, "DPDIAG train-attempt display=0x%x attempt=%u result=%d requestedRate=%" NvU64_fmtu " requestedLanes=%u actualRate=%" NvU64_fmtu " actualLanes=%u requestedFec=%d actualFec=%d",
++                  displayId, ltAttemptCount, ltStatus, requestRmLC.peakRate,
++                  requestRmLC.lanes, retLink->peakRate, retLink->lanes,
++                  requestRmLC.bEnableFEC, retLink->bEnableFEC);
++
+         // If LT passes or if client requests do not fallback, no fallback required.
+         if (ltStatus || bSkipFallback)
+         {
+@@ -1102,6 +1112,8 @@ bool EvoMainLink2x::setFlushMode(FlushModePhase phase)
+ 
+     NvU32 ret = provider->rmControl5070(NVC370_CTRL_CMD_SET_SOR_FLUSH_MODE,
+                                         &params, sizeof params);
++    DP_PRINTF(DP_NOTICE, "DPDIAG flush display=0x%x sor=%u enable=%u phase=%u status=0x%x",
++              displayId, params.sorNumber, params.bEnable, params.phase, ret);
+     if (ret != NVOS_STATUS_SUCCESS)
+     {
+         DP_PRINTF(DP_ERROR, "DP2xEVO> Enabling flush mode failed!");
+@@ -1147,6 +1159,9 @@ bool EvoMainLink2x::clearFlushMode(FlushModePhase phase,
+ 
+     NvU32 ret = provider->rmControl5070(NVC370_CTRL_CMD_SET_SOR_FLUSH_MODE,
+                                         &params, sizeof params);
++    DP_PRINTF(DP_NOTICE, "DPDIAG flush display=0x%x sor=%u enable=%u phase=%u head=%u failedHeads=0x%x status=0x%x",
++              displayId, params.sorNumber, params.bEnable, params.phase,
++              params.headIndex, params.attachFailedHeadMask, ret);
+     if (ret != NVOS_STATUS_SUCCESS)
+     {
+         DP_PRINTF(DP_ERROR, "DP2xEVO> Disabling flush mode failed!");
+@@ -1497,4 +1512,3 @@ bool EvoMainLink2x::getUSBCCableIDInfo(NV0073_CTRL_DP_USBC_CABLEID_INFO *cableID
+ 
+     return success;
+ }
+-
+diff --git a/src/nvidia-modeset/src/dp/nvdp-connector.cpp b/src/nvidia-modeset/src/dp/nvdp-connector.cpp
+index 0a9bf76..4d0469b 100644
+--- a/src/nvidia-modeset/src/dp/nvdp-connector.cpp
++++ b/src/nvidia-modeset/src/dp/nvdp-connector.cpp
+@@ -356,6 +356,15 @@ NVDPLibModesetStatePtr nvDPLibCreateModesetState(
+                         colorFormat,
+                         colorBpc,
+                         &pDpLibModesetState->modesetParams);
++
++    if (nvDoDebugLogging()) {
++        nvEvoLog(EVO_LOG_INFO,
++                 "DPDIAG modeset display=0x%x head=%u sourceBpp=%u dsc=%d targetBppX16=%u slices=%u",
++                 displayId, head, pDpLibModesetState->modesetParams.modesetInfo.depth,
++                 pDscInfo->type == NV_DSC_INFO_EVO_TYPE_DP,
++                 pDscInfo->type == NV_DSC_INFO_EVO_TYPE_DP ? pDscInfo->dp.bitsPerPixelX16 : 0,
++                 pDscInfo->sliceCount);
++    }
+     if (pDscInfo->type == NV_DSC_INFO_EVO_TYPE_DP) {
+         pDpLibModesetState->modesetParams.modesetInfo.bEnableDsc = true;
+ 
