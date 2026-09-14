@@ -3861,7 +3861,8 @@ void ConnectorImpl::dpPreModeset(const DpPreModesetParams &params)
         return;
     }
 
-    // Allow detach bookkeeping even when HPD is low.
+    // Skip gating modeset on HPD for DDS panels.
+    // Allow HPD-low detach bookkeeping; notifyLongPulse() permits detach.
     if(!previousPlugged && !bClientForcedConnected && !main->isInternalPanelDynamicMuxCapable())
     {
         for (NvU32 i = 0; i < NV_MAX_HEADS; i++)
